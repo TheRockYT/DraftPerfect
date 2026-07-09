@@ -5,7 +5,9 @@ import svelte from '@astrojs/svelte';
 
 import partytown from '@astrojs/partytown';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
-  integrations: [svelte(), partytown()]
+  integrations: [svelte(), partytown(), sitemap()]
 });
