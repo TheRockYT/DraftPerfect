@@ -1,5 +1,7 @@
 # DraftPerfect
 
+[![Deploy to GitHub Pages](https://github.com/TheRockYT/DraftPerfect/actions/workflows/deploy.yml/badge.svg)](https://github.com/TheRockYT/DraftPerfect/actions/workflows/deploy.yml)
+
 A distraction-free university essay writing assistant built with [Astro](https://astro.build) and [Svelte](https://svelte.dev). Draft essays with real-time limit tracking, configurable byte encodings (including UTF-16 LE for Korean), and automatic local saves — no account required.
 
 **Live site:** [perfectdraft.therockyt.com](https://perfectdraft.therockyt.com/)
