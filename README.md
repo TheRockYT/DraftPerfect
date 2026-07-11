@@ -1,46 +1,81 @@
-# Astro Starter Kit: Basics
+# DraftPerfect
 
-```sh
-npm create astro@latest -- --template basics
+A distraction-free university essay writing assistant built with [Astro](https://astro.build) and [Svelte](https://svelte.dev). Draft essays with real-time limit tracking, configurable byte encodings (including UTF-16 LE for Korean), and automatic local saves — no account required.
+
+**Live site:** [perfectdraft.therockyt.com](https://perfectdraft.therockyt.com/)
+
+## Features
+
+- **Distraction-free editor** — A clean editor, optimized for long-form drafting.
+- **Flexible limits** — Set a maximum by **bytes** or **characters**, with a visual progress bar that turns orange near the limit (90%) and red when exceeded.
+- **Encoding support** — Count bytes as **UTF-8** or **UTF-16 LE**. UTF-16 LE uses 2 bytes per BMP character (including Korean Hangul), matching many application portal requirements.
+- **Auto-save** — Drafts and settings are debounced and saved to `localStorage` every 2 seconds. Status indicators show *Typing…*, *Saving…*, and *All changes saved locally*.
+- **Export & clear** — Download your draft as a `.txt` file or wipe local storage with one click.
+- **Accessible UI** — ARIA labels, keyboard focus states, and system light/dark mode via `prefers-color-scheme`.
+- **Privacy-first** — All data stays in the browser. Nothing is sent to a server.
+
+## Tech Stack
+
+| Layer      | Technology                        |
+|------------|-----------------------------------|
+| Framework  | Astro 7                           |
+| UI         | Svelte 5 (interactive components) |
+| Styling    | Tailwind CSS 4                    |
+| Language   | TypeScript                        |
+| Deployment | Static site (`astro build`)       |
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) **≥ 22.12.0**
+
+### Install & run
+
+```bash
+git clone <repository-url>
+cd DraftPerfect
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Open [http://localhost:4321](http://localhost:4321) in your browser.
 
-## 🚀 Project Structure
+For background dev server management (Astro 7):
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```bash
+astro dev --background   # start in background
+astro dev status         # check status
+astro dev logs           # view logs
+astro dev stop           # stop server
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Production build
 
-## 🧞 Commands
+```bash
+npm run build
+npm run preview
+```
 
-All commands are run from the root of the project, from a terminal:
+Static output is written to `./dist/`.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## How Limits Work
 
-## 👀 Want to learn more?
+| Setting      | Description                                                                |
+|--------------|----------------------------------------------------------------------------|
+| **Maximum**  | Numeric cap (1–100,000). Default: 3,000.                                   |
+| **Unit**     | `Bytes` or `Characters` — determines which metric the progress bar tracks. |
+| **Encoding** | `UTF-8` or `UTF-16 LE` — affects byte counting and byte-based limits.      |
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The counter always displays both character and byte counts. When limiting by characters, encoding still controls how bytes are reported.
+
+Persisted draft shape in `localStorage` (`draftperfect-essay-draft`):
+
+```ts
+{
+  content: string;
+  limitValue: number;
+  limitUnit: 'bytes' | 'characters';
+  encoding: 'utf-8' | 'utf-16le';
+}
+```
