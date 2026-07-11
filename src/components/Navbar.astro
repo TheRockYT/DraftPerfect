@@ -1,0 +1,47 @@
+---
+const navLinks = [{ href: '#editor', label: 'Editor' }];
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md"
+  role="banner"
+>
+  <div
+    class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8"
+  >
+    <a
+      href="/"
+      class="group flex items-center gap-2.5 rounded-lg focus-visible:outline-offset-4"
+      aria-label="DraftPerfect home"
+    >
+      <img
+        src="/favicon.svg"
+        alt=""
+        width="32"
+        height="32"
+        class="size-8 rounded-lg shadow-sm transition-transform duration-200 group-hover:scale-105"
+        aria-hidden="true"
+      />
+      <span class="text-lg font-semibold tracking-tight text-text">
+        Draft<span class="text-accent">Perfect</span>
+      </span>
+    </a>
+
+    <nav aria-label="Main navigation">
+      <ul class="flex items-center gap-1 sm:gap-2">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="rounded-lg px-3 py-2 text-sm font-medium text-text-muted transition-colors duration-200 hover:bg-surface-muted hover:text-text"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

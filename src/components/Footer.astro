@@ -1,0 +1,38 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer
+  class="mt-auto border-t border-border bg-surface/80 backdrop-blur-sm"
+  role="contentinfo"
+>
+  <div
+    class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6 lg:px-8"
+  >
+    <p class="text-sm text-text-muted">
+      &copy; {currentYear} TheRockYT. Your drafts stay on this device.
+    </p>
+    <nav aria-label="Footer navigation">
+      <ul class="flex gap-6 text-sm">
+        <li>
+          <a
+            href="https://jonas.felsen.one/github"
+            class="text-text-muted transition-colors duration-200 hover:text-accent"
+          >
+            Built by TheRockYT
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://docs.astro.build"
+            class="text-text-muted transition-colors duration-200 hover:text-accent"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Built with Astro
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</footer>
