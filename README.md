@@ -4,7 +4,7 @@
 
 A distraction-free university essay writing assistant built with [Astro](https://astro.build) and [Svelte](https://svelte.dev). Draft essays with real-time limit tracking, configurable byte encodings (including UTF-16 LE for Korean), and automatic local saves — no account required.
 
-**Live site:** [perfectdraft.felsen.one](https://perfectdraft.felsen.one/)
+**Live site:** [draftperfect.felsen.one](https://draftperfect.felsen.one/)
 
 ## Features
 
