@@ -155,8 +155,7 @@
       {#each drafts as draft (draft.id)}
         <li
           class:bg-accent-muted={activeDraftId === draft.id}
-          class="flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-border/20 transition-colors"
-          onclick={() => activeDraftId = draft.id}
+          class="flex items-center justify-between p-3 rounded-lg hover:bg-border/20 transition-colors"
         >
           {#if editingDraftId === draft.id}
             <input
@@ -186,12 +185,13 @@
               onclick={(e) => e.stopPropagation()}
             />
           {:else}
-            <span
-              class="truncate text-sm font-medium text-text"
+            <button
+              class="flex-grow text-left truncate text-sm font-medium text-text"
+              onclick={() => activeDraftId = draft.id}
               ondblclick={() => editingDraftId = draft.id}
             >
                 {draft.title}
-            </span>
+            </button>
           {/if}
           <button
             onclick={(e) => deleteDraft(e, draft.id)}
