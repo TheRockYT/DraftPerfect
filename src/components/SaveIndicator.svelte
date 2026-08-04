@@ -50,7 +50,7 @@
       type="button"
       class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5
         text-sm font-medium text-text-muted transition-colors duration-200
-        hover:border-border-strong hover:bg-surface-muted hover:text-text"
+        hover:border-border-strong hover:bg-surface-muted hover:text-text cursor-pointer"
       onclick={onexport}
       aria-label="Export draft as text file"
     >
@@ -75,7 +75,7 @@
       type="button"
       class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5
         text-sm font-medium text-text-muted transition-colors duration-200
-        hover:border-danger/40 hover:bg-danger/5 hover:text-danger"
+        hover:border-danger/40 hover:bg-danger/5 hover:text-danger cursor-pointer"
       onclick={onclear}
       aria-label="Clear saved draft from local storage"
     >

@@ -147,7 +147,7 @@
     <h2 class="text-lg font-semibold mb-4 text-text">Drafts</h2>
     <button
       onclick={createNewDraft}
-      class="w-full mb-4 px-4 py-2 rounded-lg bg-accent text-white font-medium hover:bg-accent-hover transition-colors"
+      class="w-full mb-4 px-4 py-2 rounded-lg bg-accent text-white font-medium hover:bg-accent-hover transition-colors cursor-pointer"
     >
       + New Draft
     </button>
@@ -186,7 +186,7 @@
             />
           {:else}
             <button
-              class="flex-grow text-left truncate text-sm font-medium text-text"
+              class="grow text-left truncate text-sm font-medium text-text cursor-pointer"
               onclick={() => activeDraftId = draft.id}
               ondblclick={() => editingDraftId = draft.id}
             >
@@ -195,7 +195,7 @@
           {/if}
           <button
             onclick={(e) => deleteDraft(e, draft.id)}
-            class="text-text-muted hover:text-red-500 transition-colors"
+            class="text-text-muted hover:text-red-500 transition-colors cursor-pointer"
             aria-label="Delete draft"
           >
             ✕
