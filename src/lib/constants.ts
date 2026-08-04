@@ -1,6 +1,7 @@
 import type { LimitUnit, TextEncoding } from './types';
 
 export const STORAGE_KEY = 'draftperfect-essay-draft';
+export const STORAGE_KEY_LIST = 'draftperfect-essay-drafts-list';
 export const DEFAULT_LIMIT_VALUE = 3000;
 export const DEFAULT_LIMIT_UNIT: LimitUnit = 'bytes';
 export const DEFAULT_ENCODING: TextEncoding = 'utf-8';

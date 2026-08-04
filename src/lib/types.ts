@@ -6,10 +6,13 @@ export type TextEncoding = 'utf-8' | 'utf-16le';
 
 /** Persisted draft shape stored in localStorage */
 export interface EssayDraft {
+  id: string;
+  title: string;
   content: string;
   limitValue: number;
   limitUnit: LimitUnit;
   encoding: TextEncoding;
+  updatedAt: number;
 }
 
 /** Auto-save lifecycle states shown in the UI */

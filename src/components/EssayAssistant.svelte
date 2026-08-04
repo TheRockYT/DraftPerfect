@@ -4,28 +4,36 @@
   import EssayEditor from './EssayEditor.svelte';
   import LimitSettings from './LimitSettings.svelte';
   import SaveIndicator from './SaveIndicator.svelte';
-  import { SAVE_DEBOUNCE_MS } from '../lib/constants';
+  import {
+    SAVE_DEBOUNCE_MS,
+    DEFAULT_LIMIT_VALUE,
+    DEFAULT_LIMIT_UNIT,
+    DEFAULT_ENCODING,
+  } from '../lib/constants';
   import {
     clampLimitValue,
-    clearDraft,
-    loadDraft,
-    saveDraft,
+    loadAllDrafts,
+    saveAllDrafts,
   } from '../lib/storage';
   import type { EssayDraft, LimitUnit, SaveStatus, TextEncoding } from '../lib/types';
 
-  let draft = $state<EssayDraft>({
-    content: '',
-    limitValue: 3000,
-    limitUnit: 'bytes',
-    encoding: 'utf-8',
-  });
-
+  let drafts = $state<EssayDraft[]>([]);
+  let activeDraftId = $state<string | null>(null);
+  let editingDraftId = $state<string | null>(null);
   let saveStatus = $state<SaveStatus>('idle');
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
   let mounted = $state(false);
 
+  // Derived state
+  let activeDraft = $derived(drafts.find(d => d.id === activeDraftId));
+
   onMount(() => {
-    draft = loadDraft();
+    drafts = loadAllDrafts();
+    if (drafts.length > 0) {
+      activeDraftId = drafts[0].id;
+    } else {
+      createNewDraft();
+    }
     saveStatus = 'saved';
     mounted = true;
 
@@ -34,57 +42,82 @@
     };
   });
 
+  function createNewDraft() {
+    const newDraft: EssayDraft = {
+      id: crypto.randomUUID(),
+      title: 'New Draft',
+      content: '',
+      limitValue: DEFAULT_LIMIT_VALUE,
+      limitUnit: DEFAULT_LIMIT_UNIT,
+      encoding: DEFAULT_ENCODING,
+      updatedAt: Date.now(),
+    };
+    drafts = [newDraft, ...drafts];
+    activeDraftId = newDraft.id;
+    saveAllDrafts(drafts);
+  }
+
+  function deleteDraft(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    if (!confirm('Are you sure you want to delete this draft?')) return;
+    drafts = drafts.filter(d => d.id !== id);
+    if (activeDraftId === id) {
+      activeDraftId = drafts.length > 0 ? drafts[0].id : null;
+      if (!activeDraftId) createNewDraft();
+    }
+    saveAllDrafts(drafts);
+  }
+
   function scheduleSave() {
+    if (!activeDraft) return;
     saveStatus = 'typing';
     if (saveTimer) clearTimeout(saveTimer);
 
     saveTimer = setTimeout(() => {
       saveStatus = 'saving';
-      saveDraft(draft);
+      activeDraft!.updatedAt = Date.now();
+      saveAllDrafts(drafts);
       saveStatus = 'saved';
     }, SAVE_DEBOUNCE_MS);
   }
 
   function persistNow() {
+    if (!activeDraft) return;
     if (saveTimer) clearTimeout(saveTimer);
     saveStatus = 'saving';
-    saveDraft(draft);
+    activeDraft.updatedAt = Date.now();
+    saveAllDrafts(drafts);
     saveStatus = 'saved';
   }
 
   function handleInput(value: string) {
-    draft = { ...draft, content: value };
+    if (!activeDraft) return;
+    activeDraft.content = value;
+    activeDraft.title = value.slice(0, 20) || 'New Draft';
     if (mounted) scheduleSave();
   }
 
   function handleLimitValueChange(value: number) {
-    draft = { ...draft, limitValue: clampLimitValue(value) };
+    if (!activeDraft) return;
+    activeDraft.limitValue = clampLimitValue(value);
     if (mounted) persistNow();
   }
 
   function handleLimitUnitChange(unit: LimitUnit) {
-    draft = { ...draft, limitUnit: unit };
+    if (!activeDraft) return;
+    activeDraft.limitUnit = unit;
     if (mounted) persistNow();
   }
 
   function handleEncodingChange(encoding: TextEncoding) {
-    draft = { ...draft, encoding };
+    if (!activeDraft) return;
+    activeDraft.encoding = encoding;
     if (mounted) persistNow();
   }
 
-  function handleClear() {
-    if (!confirm('Clear your draft and settings from local storage? This cannot be undone.')) {
-      return;
-    }
-
-    if (saveTimer) clearTimeout(saveTimer);
-    clearDraft();
-    draft = loadDraft();
-    saveStatus = 'saved';
-  }
-
   function handleExport() {
-    const blob = new Blob([draft.content || ''], {
+    if (!activeDraft) return;
+    const blob = new Blob([activeDraft.content || ''], {
       type: 'text/plain;charset=utf-8',
     });
     const url = URL.createObjectURL(blob);
@@ -96,27 +129,94 @@
   }
 </script>
 
-<div class="mx-auto w-full max-w-4xl">
-  <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
-    <EssayEditor value={draft.content} oninput={handleInput} />
+<div class="mx-auto w-full max-w-6xl p-4 flex flex-col md:flex-row gap-6">
+  <div class="md:w-1/4 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+    <h2 class="text-lg font-semibold mb-4 text-text">Drafts</h2>
+    <button
+      onclick={createNewDraft}
+      class="w-full mb-4 px-4 py-2 rounded-lg bg-accent text-white font-medium hover:bg-accent-hover transition-colors"
+    >
+      + New Draft
+    </button>
+    <ul class="space-y-2">
+      {#each drafts as draft (draft.id)}
+        <li
+          class:bg-accent-muted={activeDraftId === draft.id}
+          class="flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-border/20 transition-colors"
+          onclick={() => activeDraftId = draft.id}
+        >
+          {#if editingDraftId === draft.id}
+            <input
+              type="text"
+              value={draft.title}
+              class="w-full bg-transparent border-none focus:outline-none text-sm font-medium text-text"
+              onblur={() => {
+                if (!draft.title.trim()) {
+                  draft.title = draft.content.slice(0, 20) || 'New Draft';
+                }
+                editingDraftId = null;
+                saveAllDrafts(drafts);
+              }}
+              onkeydown={(e) => {
+                if (e.key === 'Enter') {
+                    if (!draft.title.trim()) {
+                        draft.title = draft.content.slice(0, 20) || 'New Draft';
+                    }
+                    editingDraftId = null;
+                    saveAllDrafts(drafts);
+                }
+              }}
+              oninput={(e) => {
+                 const target = e.target as HTMLInputElement;
+                 draft.title = target.value;
+              }}
+              onclick={(e) => e.stopPropagation()}
+            />
+          {:else}
+            <span
+              class="truncate text-sm font-medium text-text"
+              ondblclick={() => editingDraftId = draft.id}
+            >
+                {draft.title}
+            </span>
+          {/if}
+          <button
+            onclick={(e) => deleteDraft(e, draft.id)}
+            class="text-text-muted hover:text-red-500 transition-colors"
+            aria-label="Delete draft"
+          >
+            ✕
+          </button>
+        </li>
+      {/each}
+    </ul>
+  </div>
 
-    <div class="mt-6 space-y-4">
-      <LimitSettings
-        limitValue={draft.limitValue}
-        limitUnit={draft.limitUnit}
-        encoding={draft.encoding}
-        onlimitvaluechange={handleLimitValueChange}
-        onlimitunitchange={handleLimitUnitChange}
-        onencodingchange={handleEncodingChange}
-      />
-      <ByteCounter
-        text={draft.content}
-        limitValue={draft.limitValue}
-        limitUnit={draft.limitUnit}
-        encoding={draft.encoding}
-      />
-    </div>
+  <div class="md:w-3/4">
+    {#if activeDraft}
+      {@const draft = activeDraft}
+      <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+        <EssayEditor value={draft.content} oninput={handleInput} />
 
-    <SaveIndicator status={saveStatus} onclear={handleClear} onexport={handleExport} />
+        <div class="mt-6 space-y-4">
+          <LimitSettings
+            limitValue={draft.limitValue}
+            limitUnit={draft.limitUnit}
+            encoding={draft.encoding}
+            onlimitvaluechange={handleLimitValueChange}
+            onlimitunitchange={handleLimitUnitChange}
+            onencodingchange={handleEncodingChange}
+          />
+          <ByteCounter
+            text={draft.content}
+            limitValue={draft.limitValue}
+            limitUnit={draft.limitUnit}
+            encoding={draft.encoding}
+          />
+        </div>
+
+        <SaveIndicator status={saveStatus} onclear={() => deleteDraft(new MouseEvent('click'), draft.id)} onexport={handleExport} />
+      </div>
+    {/if}
   </div>
 </div>

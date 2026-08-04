@@ -5,10 +5,11 @@ import {
   MAX_LIMIT_VALUE,
   MIN_LIMIT_VALUE,
   STORAGE_KEY,
+  STORAGE_KEY_LIST,
 } from './constants';
 import type { EssayDraft, LimitUnit, TextEncoding } from './types';
 
-const DEFAULT_DRAFT: EssayDraft = {
+const DEFAULT_DRAFT_CONTENT = {
   content: '',
   limitValue: DEFAULT_LIMIT_VALUE,
   limitUnit: DEFAULT_LIMIT_UNIT,
@@ -28,32 +29,43 @@ function isEncoding(value: unknown): value is TextEncoding {
   return value === 'utf-8' || value === 'utf-16le';
 }
 
-/** Loads the essay draft from localStorage, falling back to defaults. */
-export function loadDraft(): EssayDraft {
-  if (typeof window === 'undefined') return { ...DEFAULT_DRAFT };
+/** Loads all essay drafts, migrating legacy ones if necessary. */
+export function loadAllDrafts(): EssayDraft[] {
+  if (typeof window === 'undefined') return [];
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_DRAFT };
+    const rawList = localStorage.getItem(STORAGE_KEY_LIST);
+    if (rawList) {
+      return JSON.parse(rawList) as EssayDraft[];
+    }
 
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return normalizeDraft(parsed);
-  } catch {
-    return { ...DEFAULT_DRAFT };
+    // Migration
+    const legacyRaw = localStorage.getItem(STORAGE_KEY);
+    if (legacyRaw) {
+      const parsed = JSON.parse(legacyRaw) as Record<string, unknown>;
+      const legacyDraft = normalizeDraft(parsed);
+      const migrated: EssayDraft = {
+        ...legacyDraft,
+        id: crypto.randomUUID(),
+        title: 'Untitled Draft',
+        updatedAt: Date.now(),
+      };
+      saveAllDrafts([migrated]);
+      localStorage.removeItem(STORAGE_KEY);
+      return [migrated];
+    }
+  } catch (e) {
+    console.error('Failed to load drafts', e);
   }
+  return [];
 }
 
-/** Persists the essay draft to localStorage. */
-export function saveDraft(draft: EssayDraft): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+/** Persists all essay drafts to localStorage. */
+export function saveAllDrafts(drafts: EssayDraft[]): void {
+  localStorage.setItem(STORAGE_KEY_LIST, JSON.stringify(drafts));
 }
 
-/** Removes the stored draft from localStorage. */
-export function clearDraft(): void {
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-function normalizeDraft(parsed: Record<string, unknown>): EssayDraft {
+function normalizeDraft(parsed: Record<string, unknown>): Omit<EssayDraft, 'id' | 'title' | 'updatedAt'> {
   // Migrate legacy multi-section format
   if ('personalStatement' in parsed || 'studyPlan' in parsed) {
     const parts = [
@@ -62,7 +74,7 @@ function normalizeDraft(parsed: Record<string, unknown>): EssayDraft {
     ].filter(Boolean);
 
     return {
-      ...DEFAULT_DRAFT,
+      ...DEFAULT_DRAFT_CONTENT,
       content: parts.join('\n\n'),
     };
   }
@@ -74,7 +86,7 @@ function normalizeDraft(parsed: Record<string, unknown>): EssayDraft {
       typeof parsed.byteLimit === 'number' ? parsed.byteLimit : DEFAULT_LIMIT_VALUE;
 
     return {
-      content: typeof parsed.content === 'string' ? parsed.content : DEFAULT_DRAFT.content,
+      content: typeof parsed.content === 'string' ? parsed.content : DEFAULT_DRAFT_CONTENT.content,
       limitValue: charLimit > 0 ? clampLimitValue(charLimit) : clampLimitValue(byteLimit),
       limitUnit: charLimit > 0 ? 'characters' : 'bytes',
       encoding: DEFAULT_ENCODING,
@@ -82,12 +94,12 @@ function normalizeDraft(parsed: Record<string, unknown>): EssayDraft {
   }
 
   return {
-    content: typeof parsed.content === 'string' ? parsed.content : DEFAULT_DRAFT.content,
+    content: typeof parsed.content === 'string' ? parsed.content : DEFAULT_DRAFT_CONTENT.content,
     limitValue:
       typeof parsed.limitValue === 'number'
         ? clampLimitValue(parsed.limitValue)
-        : DEFAULT_DRAFT.limitValue,
-    limitUnit: isLimitUnit(parsed.limitUnit) ? parsed.limitUnit : DEFAULT_DRAFT.limitUnit,
-    encoding: isEncoding(parsed.encoding) ? parsed.encoding : DEFAULT_DRAFT.encoding,
+        : DEFAULT_DRAFT_CONTENT.limitValue,
+    limitUnit: isLimitUnit(parsed.limitUnit) ? parsed.limitUnit : DEFAULT_DRAFT_CONTENT.limitUnit,
+    encoding: isEncoding(parsed.encoding) ? parsed.encoding : DEFAULT_DRAFT_CONTENT.encoding,
   };
 }
