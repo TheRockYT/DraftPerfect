@@ -14,6 +14,8 @@
     clampLimitValue,
     loadAllDrafts,
     saveAllDrafts,
+    saveActiveDraftId,
+    loadActiveDraftId,
   } from '../lib/storage';
   import type { EssayDraft, LimitUnit, SaveStatus, TextEncoding } from '../lib/types';
 
@@ -30,7 +32,12 @@
   onMount(() => {
     drafts = loadAllDrafts();
     if (drafts.length > 0) {
-      activeDraftId = drafts[0].id;
+      const savedId = loadActiveDraftId();
+      if (savedId && drafts.find(d => d.id === savedId)) {
+        activeDraftId = savedId;
+      } else {
+        activeDraftId = drafts[0].id;
+      }
     } else {
       createNewDraft();
     }
@@ -40,6 +47,12 @@
     return () => {
       if (saveTimer) clearTimeout(saveTimer);
     };
+  });
+
+  $effect(() => {
+    if (activeDraftId) {
+      saveActiveDraftId(activeDraftId);
+    }
   });
 
   function createNewDraft() {

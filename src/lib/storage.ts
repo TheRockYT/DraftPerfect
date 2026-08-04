@@ -6,6 +6,7 @@ import {
   MIN_LIMIT_VALUE,
   STORAGE_KEY,
   STORAGE_KEY_LIST,
+  STORAGE_KEY_ACTIVE_DRAFT,
 } from './constants';
 import type { EssayDraft, LimitUnit, TextEncoding } from './types';
 
@@ -63,6 +64,16 @@ export function loadAllDrafts(): EssayDraft[] {
 /** Persists all essay drafts to localStorage. */
 export function saveAllDrafts(drafts: EssayDraft[]): void {
   localStorage.setItem(STORAGE_KEY_LIST, JSON.stringify(drafts));
+}
+
+/** Persists active draft ID to localStorage. */
+export function saveActiveDraftId(id: string): void {
+  localStorage.setItem(STORAGE_KEY_ACTIVE_DRAFT, id);
+}
+
+/** Loads active draft ID from localStorage. */
+export function loadActiveDraftId(): string | null {
+  return localStorage.getItem(STORAGE_KEY_ACTIVE_DRAFT);
 }
 
 function normalizeDraft(parsed: Record<string, unknown>): Omit<EssayDraft, 'id' | 'title' | 'updatedAt'> {
