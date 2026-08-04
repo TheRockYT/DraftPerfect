@@ -1,0 +1,14 @@
+---
+import EssayAssistant from '../components/EssayAssistant.svelte';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Editor — DraftPerfect">
+    <section
+        id="editor"
+        class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8"
+        aria-label="Essay editor"
+    >
+        <EssayAssistant client:load/>
+    </section>
+</Layout>
