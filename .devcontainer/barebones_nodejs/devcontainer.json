@@ -5,6 +5,9 @@
   },
   "remoteUser": "node",
   "containerUser": "node",
+  "forwardPorts": [
+    4321
+  ],
   "customizations": {
     "jetbrains": {
       "backend": "WebStorm"
