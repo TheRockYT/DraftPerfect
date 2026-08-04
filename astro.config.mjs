@@ -11,7 +11,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://draftperfect.therockyt.com/',
+  site: 'https://draftperfect.felsen.one/',
   integrations: [svelte(), partytown(), sitemap()],
 
   vite: {
