@@ -23,7 +23,7 @@ export function clampLimitValue(value: number): number {
 }
 
 function isLimitUnit(value: unknown): value is LimitUnit {
-  return value === 'bytes' || value === 'characters';
+  return value === 'bytes' || value === 'characters' || value === 'words';
 }
 
 function isEncoding(value: unknown): value is TextEncoding {

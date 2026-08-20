@@ -15,6 +15,7 @@ export const MAX_LIMIT_VALUE = 100_000;
 export const LIMIT_UNIT_OPTIONS: { value: LimitUnit; label: string }[] = [
   { value: 'bytes', label: 'Bytes' },
   { value: 'characters', label: 'Characters' },
+  { value: 'words', label: 'Words' },
 ];
 
 export const ENCODING_OPTIONS: { value: TextEncoding; label: string; description: string }[] = [

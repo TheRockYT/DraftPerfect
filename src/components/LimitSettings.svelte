@@ -84,14 +84,14 @@
       </div>
       <p id="limit-value-hint" class="mt-1 text-xs text-text-subtle">
         {MIN_LIMIT_VALUE.toLocaleString()}–{MAX_LIMIT_VALUE.toLocaleString()}
-        {limitUnit === 'bytes' ? 'bytes' : 'characters'}
+        {limitUnit === 'bytes' ? 'bytes' : limitUnit === 'characters' ? 'characters' : 'words'}
       </p>
     </div>
 
     <div>
       <label for="encoding" class="mb-1.5 block text-xs font-medium text-text-muted">
         Byte encoding
-        {#if limitUnit === 'characters'}
+        {#if limitUnit !== 'bytes'}
           <span class="font-normal text-text-subtle">(for byte count display)</span>
         {/if}
       </label>

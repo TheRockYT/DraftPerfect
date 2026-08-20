@@ -38,6 +38,12 @@ export function getEncodedByteLength(text: string, encoding: TextEncoding): numb
   return encoding === 'utf-16le' ? getUtf16LeByteLength(text) : getUtf8ByteLength(text);
 }
 
+/** Returns word count (whitespace-delimited). */
+export function getWordCount(text: string): number {
+  const trimmed = text.trim();
+  return trimmed ? trimmed.split(/\s+/u).length : 0;
+}
+
 /** Human-readable label for the active encoding. */
 export function getEncodingLabel(encoding: TextEncoding): string {
   return encoding === 'utf-16le' ? 'UTF-16 LE' : 'UTF-8';
@@ -49,7 +55,9 @@ export function getMeasuredValue(
   unit: LimitUnit,
   encoding: TextEncoding,
 ): number {
-  return unit === 'characters' ? text.length : getEncodedByteLength(text, encoding);
+  if (unit === 'characters') return text.length;
+  if (unit === 'words') return getWordCount(text);
+  return getEncodedByteLength(text, encoding);
 }
 
 export type LimitStatus = 'safe' | 'near' | 'over';
