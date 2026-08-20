@@ -5,6 +5,7 @@
     getLimitStatus,
     getMeasuredValue,
     getProgressPercent,
+    getWordCount,
   } from '../lib/byte-utils';
   import type { LimitUnit, TextEncoding } from '../lib/types';
 
@@ -19,6 +20,7 @@
 
   const charCount = $derived(text.length);
   const byteLength = $derived(getEncodedByteLength(text, encoding));
+  const wordCount = $derived(getWordCount(text));
   const measured = $derived(getMeasuredValue(text, limitUnit, encoding));
   const status = $derived(getLimitStatus(measured, limitValue));
   const progress = $derived(getProgressPercent(measured, limitValue));
@@ -39,7 +41,9 @@
         : 'Within limit',
   );
 
-  const primaryLabel = $derived(limitUnit === 'bytes' ? 'bytes' : 'characters');
+  const primaryLabel = $derived(
+    limitUnit === 'bytes' ? 'bytes' : limitUnit === 'characters' ? 'characters' : 'words',
+  );
   const encodingLabel = $derived(getEncodingLabel(encoding));
 </script>
 
@@ -80,6 +84,22 @@
           / {limitValue.toLocaleString()} bytes ({encodingLabel})
         {:else}
           bytes ({encodingLabel})
+        {/if}
+      </p>
+      <p class="text-text-muted">
+        <span
+          class="font-medium tabular-nums {limitUnit === 'words' && status !== 'safe'
+            ? status === 'over'
+              ? 'text-danger'
+              : 'text-warning'
+            : 'text-text'}"
+        >
+          {wordCount.toLocaleString()}
+        </span>
+        {#if limitUnit === 'words'}
+          / {limitValue.toLocaleString()} words
+        {:else}
+          words
         {/if}
       </p>
     </div>
